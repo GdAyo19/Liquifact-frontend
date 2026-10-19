@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useNotifications } from "@/components/NotificationsProvider";
 import { createInvoice } from "@/lib/api";
 import { validateInvoiceForm } from "@/lib/format";
 
@@ -12,6 +13,7 @@ export default function SubmitForm() {
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
+  const { follow } = useNotifications();
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   async function onSubmit(e) {
@@ -33,6 +35,7 @@ export default function SubmitForm() {
       };
       const { data } = await createInvoice(payload);
       setResult({ ok: true, invoice: data });
+      follow(data.id); // auto-follow the submitted invoice
       setForm(EMPTY);
     } catch (err) {
       setResult({ ok: false, text: (err.details && err.details.join("; ")) || err.message });
